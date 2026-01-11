@@ -1,0 +1,520 @@
+# gg
+김현구
+onlypigeon99
+자리 비움
+
+#개발 채널의 시작이에요. 
+이도윤 — 2025-12-07 오후 7:13
+재영,도현 개발
+김도현 — 2025-12-30 오후 5:55
+아직 디자인이 없는 관계로 임의로 약간만 만들어진 버전 올려봅니다.
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교사용 수업 지원 도구 (프로토타입)</title>
+확장
+프론트엔드_1_251230.html
+14KB
+김도현 — 2025-12-30 오후 6:18
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>늘봄학교 강사 매칭 플랫폼</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f5f7fa; }
+        .mode-switch { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        
+        /* 사용자 모드 스타일 */
+        .user-header { background-color: #fff; border-bottom: 1px solid #ddd; }
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0; margin-bottom: 30px;}
+        
+        /* 마이페이지 탭 스타일 */
+        .mypage-sidebar .list-group-item.active {
+            background-color: #667eea;
+            border-color: #667eea;
+            font-weight: bold;
+        }
+        .mypage-sidebar .list-group-item { cursor: pointer; }
+
+        /* Footer 스타일 */
+        footer { background-color: #2c3e50; color: #adb5bd; font-size: 0.9rem; }
+        footer h6 { color: #fff; font-weight: bold; margin-bottom: 15px; }
+        footer a { color: #adb5bd; text-decoration: none; display: block; margin-bottom: 8px; }
+        footer a:hover { color: #fff; text-decoration: underline; }
+        .footer-bottom { border-top: 1px solid #495057; padding-top: 20px; margin-top: 20px; }
+
+        /* 관리자 모드 스타일 */
+        .admin-sidebar { min-height: 100vh; background-color: #2c3e50; color: white; width: 250px; position: fixed; left: 0; top: 0; }
+        .admin-content { margin-left: 250px; padding: 30px; }
+        .admin-link { color: rgba(255,255,255,0.7); text-decoration: none; padding: 10px 15px; display: block; }
+        .admin-link:hover, .admin-link.active { background-color: #1abc9c; color: white; }
+
+        /* 공통 유틸리티 */
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="mode-switch">
+        <div class="btn-group shadow">
+            <button class="btn btn-dark" onclick="switchMode('user')">👨🏫 사용자 모드</button>
+            <button class="btn btn-danger" onclick="switchMode('admin')">🛠 관리자 모드</button>
+        </div>
+    </div>
+
+    <div id="user-mode-container">
+        <nav class="navbar navbar-expand-lg user-header py-3">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-primary" href="#">Neulbom</a>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="#">늘봄소개</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">강사 신청</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">게시판/문의</a></li>
+                        <li class="nav-item dropdown ms-3">
+                            <a class="btn btn-outline-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <span class="material-icons-round align-middle" style="font-size:18px;">person</span> 김현구님
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">마이페이지</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">로그아웃</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="hero-section text-center">
+            <div class="container">
+                <h2 class="fw-bold mb-0">마이페이지 </h2>
+                <p class="small opacity-75 mt-2">나의 활동 내역과 정보를 한눈에 관리하세요.</p>
+            </div>
+        </div>
+
+        <div class="container mb-5">
+            <div class="row">
+                <div class="col-md-3 mypage-sidebar">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold py-3">메뉴</div>
+                        <div class="list-group list-group-flush" id="myPageTab" role="tablist">
+                            <a class="list-group-item list-group-item-action" id="info-tab" data-bs-toggle="list" href="#info" role="tab">
+                                <span class="material-icons-round align-middle me-2 fs-6">manage_accounts</span>내 정보 관리
+                            </a>
+                            <a class="list-group-item list-group-item-action active" id="history-tab" data-bs-toggle="list" href="#history" role="tab">
+                                <span class="material-icons-round align-middle me-2 fs-6">history</span>지원 이력
+                            </a>
+                            <a class="list-group-item list-group-item-action" id="result-tab" data-bs-toggle="list" href="#result" role="tab">
+                                <span class="material-icons-round align-middle me-2 fs-6">assignment_turned_in</span>배정결과 확인
+                            </a>
+                        </div>
+                    </div>
+... (284줄 남음)
+접기
+프론트엔드_3_251230.html
+22KB
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>늘봄학교 강사 매칭 플랫폼</title>
+확장
+프론트엔드_2_251230.html
+15KB
+이도윤 — 2025-12-30 오후 7:51
+기획팀에서 1차 기획 세부회의 진행하였고 구글문서 들어가보시면 기획안 적어놓았으니 참고하여 개발부탁드립니다.
+﻿
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>늘봄학교 강사 매칭 플랫폼</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f5f7fa; }
+        .mode-switch { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        
+        /* 사용자 모드 스타일 */
+        .user-header { background-color: #fff; border-bottom: 1px solid #ddd; }
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0; margin-bottom: 30px;}
+        
+        /* 마이페이지 탭 스타일 */
+        .mypage-sidebar .list-group-item.active {
+            background-color: #667eea;
+            border-color: #667eea;
+            font-weight: bold;
+        }
+        .mypage-sidebar .list-group-item { cursor: pointer; }
+
+        /* Footer 스타일 */
+        footer { background-color: #2c3e50; color: #adb5bd; font-size: 0.9rem; }
+        footer h6 { color: #fff; font-weight: bold; margin-bottom: 15px; }
+        footer a { color: #adb5bd; text-decoration: none; display: block; margin-bottom: 8px; }
+        footer a:hover { color: #fff; text-decoration: underline; }
+        .footer-bottom { border-top: 1px solid #495057; padding-top: 20px; margin-top: 20px; }
+
+        /* 관리자 모드 스타일 */
+        .admin-sidebar { min-height: 100vh; background-color: #2c3e50; color: white; width: 250px; position: fixed; left: 0; top: 0; }
+        .admin-content { margin-left: 250px; padding: 30px; }
+        .admin-link { color: rgba(255,255,255,0.7); text-decoration: none; padding: 10px 15px; display: block; }
+        .admin-link:hover, .admin-link.active { background-color: #1abc9c; color: white; }
+
+        /* 공통 유틸리티 */
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="mode-switch">
+        <div class="btn-group shadow">
+            <button class="btn btn-dark" onclick="switchMode('user')">👨‍🏫 사용자 모드</button>
+            <button class="btn btn-danger" onclick="switchMode('admin')">🛠 관리자 모드</button>
+        </div>
+    </div>
+
+    <div id="user-mode-container">
+        <nav class="navbar navbar-expand-lg user-header py-3">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-primary" href="#">Neulbom</a>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="#">늘봄소개</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">강사 신청</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">게시판/문의</a></li>
+                        <li class="nav-item dropdown ms-3">
+                            <a class="btn btn-outline-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <span class="material-icons-round align-middle" style="font-size:18px;">person</span> 김현구님
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">마이페이지</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">로그아웃</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="hero-section text-center">
+            <div class="container">
+                <h2 class="fw-bold mb-0">마이페이지 </h2>
+                <p class="small opacity-75 mt-2">나의 활동 내역과 정보를 한눈에 관리하세요.</p>
+            </div>
+        </div>
+
+        <div class="container mb-5">
+            <div class="row">
+                <div class="col-md-3 mypage-sidebar">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold py-3">메뉴</div>
+                        <div class="list-group list-group-flush" id="myPageTab" role="tablist">
+                            <a class="list-group-item list-group-item-action" id="info-tab" data-bs-toggle="list" href="#info" role="tab">
+                                <span class="material-icons-round align-middle me-2 fs-6">manage_accounts</span>내 정보 관리
+                            </a>
+                            <a class="list-group-item list-group-item-action active" id="history-tab" data-bs-toggle="list" href="#history" role="tab">
+                                <span class="material-icons-round align-middle me-2 fs-6">history</span>지원 이력
+                            </a>
+                            <a class="list-group-item list-group-item-action" id="result-tab" data-bs-toggle="list" href="#result" role="tab">
+                                <span class="material-icons-round align-middle me-2 fs-6">assignment_turned_in</span>배정결과 확인
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="tab-content" id="myPageTabContent">
+                        
+                        <div class="tab-pane fade" id="info" role="tabpanel">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body p-4">
+                                    <h4 class="fw-bold mb-4">내 정보 수정</h4>
+                                    <form>
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">이름</label>
+                                            <input type="text" class="form-control" value="김현구" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">소속/전공</label>
+                                            <input type="text" class="form-control" value="컴퓨터교육과">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">이메일</label>
+                                            <input type="email" class="form-control" value="dove@neulbom.kr">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">연락처</label>
+                                            <input type="text" class="form-control" value="010-1234-5678">
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-primary">저장하기</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade show active" id="history" role="tabpanel">
+                            <h4 class="fw-bold mb-3">진행중인 신청</h4>
+                            
+                            <div class="card mb-4 shadow-sm border-0 border-start border-4 border-primary">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="card-title fw-bold mb-0">2026학년도 1학기 코딩 교육 강사</h5>
+                                        <span class="badge bg-success">접수중</span>
+                                    </div>
+                                    <p class="text-muted small mb-3">안동초등학교 | 접수마감: D-3</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">지원일: 2025.12.30</small>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-secondary">신청서 수정</button>
+                                            <button class="btn btn-sm btn-outline-danger">취소</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="fw-bold mb-3 mt-5">종료된 신청</h4>
+                            <div class="card mb-3 shadow-sm border-0 bg-light">
+                                <div class="card-body opacity-75">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="fw-bold">2025 겨울방학 창의미술 강사</h6>
+                                            <small>심사 완료</small>
+                                        </div>
+                                        <span class="badge bg-secondary">마감</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="result" role="tabpanel">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body p-5 text-center">
+                                    <div class="mb-4">
+                                        <span class="material-icons-round text-primary" style="font-size: 4rem;">check_circle</span>
+                                    </div>
+                                    <h3 class="fw-bold">배정이 완료되었습니다!</h3>
+                                    <p class="text-muted mb-4">2025학년도 2학기 늘봄학교 프로그램 강사로 배정되었습니다.</p>
+                                    
+                                    <div class="card bg-light border-0 mb-4 text-start mx-auto" style="max-width: 500px;">
+                                        <div class="card-body">
+                                            <ul class="list-unstyled mb-0">
+                                                <li class="mb-2"><strong>학교명:</strong> 안동부설초등학교</li>
+                                                <li class="mb-2"><strong>프로그램:</strong> 파이썬 기초와 활용</li>
+                                                <li class="mb-2"><strong>기간:</strong> 2025.09.01 ~ 2025.12.20</li>
+                                                <li><strong>강사료:</strong> 시간당 40,000원</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="btn btn-primary px-4">계약서 작성 바로가기</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="container py-5">
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <h6>Neulbom Service</h6>
+                        <a href="#">서비스 안내</a>
+                        <a href="#">강사/기관 안내</a>
+                        <a href="#">강사 매칭 절차</a>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <h6>정책 및 약관</h6>
+                        <a href="#">이용약관</a>
+                        <a href="#">개인정보처리방침</a>
+                        <a href="#">저작권 정책</a>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <h6>고객지원</h6>
+                        <a href="#">공지사항</a>
+                        <a href="#">자주 묻는 질문 (FAQ)</a>
+                        <a href="#">문의하기</a>
+                        <a href="#">자료실</a>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <h6>Contact Us</h6>
+                        <p class="mb-1">운영기관: 경북교육청 늘봄지원센터</p>
+                        <p class="mb-1">연락처: 054-123-4567</p>
+                        <p class="mb-3">이메일: help@neulbom.kr</p>
+                        <a href="#" class="btn btn-sm btn-outline-light d-inline-block mt-2">관련 사이트 바로가기</a>
+                    </div>
+                </div>
+                
+                <div class="footer-bottom text-center">
+                    <p class="mb-0">&copy; 2025 Neulbom Platform. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="admin-mode-container" style="display: none;">
+        <div class="admin-sidebar d-flex flex-column p-3">
+            <h4 class="mb-4 text-center fw-bold text-white">ADMIN</h4>
+            <nav class="nav flex-column">
+                <a href="#" class="admin-link active">
+                    <span class="material-icons-round align-middle me-2">dashboard</span> 대시보드
+                </a>
+                <a href="#" class="admin-link">
+                    <span class="material-icons-round align-middle me-2">dvr</span> 프로그램 관리
+                </a>
+                <a href="#" class="admin-link">
+                    <span class="material-icons-round align-middle me-2">manage_accounts</span> 강사 관리
+                </a>
+                <a href="#" class="admin-link">
+                    <span class="material-icons-round align-middle me-2">settings</span> 게시판/회원 관리
+                </a>
+            </nav>
+        </div>
+
+        <div class="admin-content">
+            <h2 class="mb-4">관리자 대시보드</h2>
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>총 프로그램</h6>
+                            <h3>120개</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>강사/기관 승인 대기</h6>
+                            <h3>5건</h3>
+                            <small>즉시 확인 필요</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>매칭 완료</h6>
+                            <h3>98건</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>미답변 문의</h6>
+                            <h3>3건</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">승인 대기 목록</h5>
+                            <button class="btn btn-sm btn-outline-primary">전체보기</button>
+                        </div>
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>신청자</th>
+                                    <th>구분</th>
+                                    <th>신청일</th>
+                                    <th>상태</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>김현구</td>
+                                    <td><span class="badge bg-info">개인강사</span></td>
+                                    <td>2025-12-30</td>
+                                    <td><span class="badge bg-warning text-dark">대기중</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">승인</button>
+                                        <button class="btn btn-sm btn-outline-danger">반려</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>코딩교육연구소</td>
+                                    <td><span class="badge bg-secondary">기관</span></td>
+                                    <td>2025-12-29</td>
+                                    <td><span class="badge bg-warning text-dark">대기중</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">승인</button>
+                                        <button class="btn btn-sm btn-outline-danger">반려</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">프로그램 진행 현황</div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    창의 미술 A반
+                                    <span class="badge bg-primary rounded-pill">진행중</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    파이썬 기초
+                                    <span class="badge bg-primary rounded-pill">진행중</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    드론 축구
+                                    <span class="badge bg-secondary rounded-pill">모집마감</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchMode(mode) {
+            const userContainer = document.getElementById('user-mode-container');
+            const adminContainer = document.getElementById('admin-mode-container');
+            
+            if (mode === 'user') {
+                userContainer.style.display = 'block';
+                adminContainer.style.display = 'none';
+                document.body.style.backgroundColor = '#f5f7fa'; 
+            } else {
+                userContainer.style.display = 'none';
+                adminContainer.style.display = 'block';
+                document.body.style.backgroundColor = '#e9ecef'; 
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
